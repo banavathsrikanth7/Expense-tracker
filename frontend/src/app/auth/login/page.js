@@ -1,8 +1,6 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { auth } from "../../../services/firebase";
 import { useRouter } from "next/navigation";
 import { login } from "@/lib/api";
 
@@ -16,7 +14,7 @@ export default function LoginPage() {
     console.log({ name, email, password });
   
   try {
-    await signInWithEmailAndPassword(auth, email, password);
+    await login({ email, password });
     router.push("/dashboard");
   } catch (error) {
     alert("Invalid credentials");

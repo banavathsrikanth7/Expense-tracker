@@ -1,6 +1,4 @@
 "use client";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../../../services/firebase";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
@@ -12,11 +10,10 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const router = useRouter();
 
-  const handleSubmit = async(e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
     console.log({ name, email, password });
    try {
-    await createUserWithEmailAndPassword(auth, email, password);
     // Call the signup API endpoint
     await signup({ name, email, password });
     router.push("/login");
