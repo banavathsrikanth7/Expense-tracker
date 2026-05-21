@@ -1,26 +1,53 @@
+"use client";
+
+import { motion } from "framer-motion";
+
 export default function SummaryCard({
 title,
-value,
-color
+value
 }){
 
 return(
 
-<div className={`
-${color}
+<motion.div
+
+initial={{
+opacity:0,
+y:20
+}}
+
+animate={{
+opacity:1
+}}
+
+whileHover={{
+scale:1.05,
+y:-5
+}}
+
+className="
+animated-card
 text-white
-p-6
+p-4
 rounded-2xl
 shadow-xl
-hover:scale-105
-transition
-duration-300
-`}>
+h-28
+flex
+flex-col
+justify-center
+transition-all
+duration-500
+"
+
+>
 
 <h3 className="
-text-lg
+text-sm
+font-semibold
 ">
+
 {title}
+
 </h3>
 
 <h1 className="
@@ -33,7 +60,7 @@ mt-2
 
 </h1>
 
-</div>
+</motion.div>
 
 )
 

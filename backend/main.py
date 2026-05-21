@@ -1,14 +1,27 @@
+from django import db
 from fastapi import FastAPI
 from fastapi import Header
 from models import User, Transaction
 from database import SessionLocal
 from auth import hash_password, verify_password, create_token,verify_token
 from schemas import LoginRequest
+from fastapi import *
+from fastapi.middleware.cors import CORSMiddleware
 from schemas import RegisterRequest,TransactionRequest
-app = FastAPI()
+from fastapi.responses import FileResponse
 
-@app.post("/Signup")
-def Signup (data: RegisterRequest):
+import csv
+app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
+
+@app.post("/register")
+def register (data: RegisterRequest):
     db = SessionLocal()
     existing_user = db.query(User).filter(User.email == data.email).first()
     if existing_user:
@@ -72,6 +85,10 @@ def get_current_user(token: str):
 def create_transaction(data: TransactionRequest, Authorization: str = Header(None)):
     print("AUTH:", Authorization)
     current_user = get_current_user(Authorization)
+    if not Authorization:
+        return {"error": "Unauthorized"}
+    token = Authorization.replace("Bearer ", "")
+    current_user = get_current_user(token)
     if not current_user:
         return {"error": "Unauthorized"}
     db = SessionLocal()
@@ -85,13 +102,18 @@ def create_transaction(data: TransactionRequest, Authorization: str = Header(Non
     )
     db.add(transaction)
     db.commit()
+    db.refresh(transaction)
     return {"message": "Transaction created"}
 
 
 @app.get("/transactions")
 def get_transactions(Authorization: str = Header(None)):
     print("AUTH:", Authorization)
-    current_user = get_current_user(Authorization)
+   
+    if not Authorization:
+        return {"error": "invalid token "}
+    token = Authorization.replace("Bearer ", "")
+    current_user = get_current_user(token)
     if not current_user:
         return {"error": "invalid token "}
     db = SessionLocal()
@@ -100,32 +122,79 @@ def get_transactions(Authorization: str = Header(None)):
 
 
 @app.get("/summary")
-def get_summary(Authorization: str = Header(None)):
-    current_user = get_current_user(Authorization)
-    if not current_user:
-        return {"error": "invalid token "}
-    db = SessionLocal()
-    transactions = db.query(Transaction).filter(Transaction.user_id == current_user.id).all()
-    total_income = 0
-    total_expense = 0
+def get_summary(Authorization:str=Header(None)):
+    print("SUMMARY START")
 
-    for transaction in transactions:
-        if transaction.type == "income":
-            total_income += transaction.amount
-        elif transaction.type == "expense":
-            total_expense += transaction.amount 
-        balance = total_income - total_expense
+    try:
+        token=Authorization.replace( "Bearer ","")
+        current_user=  get_current_user( token)
+        print("USER:", current_user )
+        db= SessionLocal()
+        transactions= db.query(Transaction).filter( Transaction.user_id==current_user.id ).all()
+        print(
+        "DATA:",
+        transactions
+        )
 
-    return {
-        "total_income": total_income,
-        "total_expense": total_expense,
-        "balance": balance
-    }
+        total_income=0
+        total_expense=0
+
+        for t in transactions:
+
+            print(
+            t.type
+            )
+
+            if t.type=="income":
+
+                total_income+=float(
+                t.amount
+                )
+
+            elif t.type=="expense":
+
+                total_expense+=float(
+                t.amount
+                )
+
+        balance =  total_income-total_expense
+       
+
+        return{
+
+        "total_income":
+        total_income,
+
+        "total_expense":
+        total_expense,
+
+        "balance":
+        balance
+
+        }
+
+    except Exception as e:
+
+        print(
+        "ERROR:",
+        e
+        )
+
+        return{
+
+        "error":
+        str(e)
+
+        }
 
 
 @app.get("/category-summary")   
 def category_summary(Authorization: str = Header(None)):
-    current_user = get_current_user(Authorization)
+   
+    if not Authorization:
+        return {"error": "invalid token "}
+    token = Authorization.replace("Bearer ", "")
+    current_user = get_current_user(token)
     if not current_user:
         return {"error": "invalid token "}
     db = SessionLocal()
@@ -147,8 +216,8 @@ def delete_transaction(
     transaction_id: int,
     Authorization: str = Header(None)
 ):
-
-    current_user = get_current_user(Authorization)
+    token = Authorization.replace("Bearer ", "")
+    current_user = get_current_user(token)
 
     if not current_user:
         return {"error": "Unauthorized"}
@@ -175,7 +244,8 @@ def update_transaction(
     data: TransactionRequest,
     Authorization: str = Header(None)
 ):
-    current_user = get_current_user(Authorization)
+    token = Authorization.replace("Bearer ", "")
+    current_user = get_current_user(token)
 
     if not current_user:
         return {"error": "Unauthorized"}
@@ -189,14 +259,95 @@ def update_transaction(
 
     if not transaction:
         return {"error": "Transaction not found"}
-
+  
     transaction.title = data.title
     transaction.amount = data.amount
     transaction.category = data.category
     transaction.description = data.description
     transaction.type = data.type
-
+    transaction.user_id = current_user.id
+    
+    
     db.commit()
 
     return {"message": "Transaction updated"}
+@app.get("/export")
+def export_data(
+    Authorization:str=Header(None)
+):
 
+    try:
+
+        print("EXPORT START")
+
+        token=  Authorization.replace( "Bearer ","")
+        
+
+        current_user= get_current_user(token)
+       
+
+        print(
+        "USER:",
+        current_user
+        )
+
+        db= SessionLocal()
+       
+
+        transactions= db.query(
+        Transaction
+        ).filter(
+        Transaction.user_id==
+        current_user.id
+        ).all()
+
+        print(
+        "TRANSACTIONS:",
+        transactions
+        )
+
+        file="transactions.csv"
+
+        with open(
+        file,
+        "w",
+        newline=""
+        ) as csvfile:
+
+            writer=csv.writer(csvfile)
+            
+            
+
+            writer.writerow([
+            "Title",
+            "Amount",
+            "Category",
+            "Type"
+            ])
+
+            for t in transactions:
+
+                writer.writerow([
+                t.title,
+                t.amount,
+                t.category,
+                t.type
+                ])
+
+        return FileResponse(
+        file,
+        media_type="text/csv",
+        filename="transactions.csv"
+        )
+
+    except Exception as e:
+
+        print(
+        "EXPORT ERROR:",
+        e
+        )
+
+        return{
+        "error":
+        str(e)
+        }

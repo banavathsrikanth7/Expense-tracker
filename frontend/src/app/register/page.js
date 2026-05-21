@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
-import { signup } from "@/lib/api";
+import { register } from "@/lib/api";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -14,9 +14,9 @@ export default function RegisterPage() {
     e.preventDefault();
     console.log({ name, email, password });
    try {
-    // Call the signup API endpoint
-    await signup({ name, email, password });
-    router.push("/login");
+    // Call the register API endpoint
+    await register({ name, email, password });
+    router.push("/dashboard");
   } catch (error) {
     alert(error.message);
   }

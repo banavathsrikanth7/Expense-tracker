@@ -1,5 +1,5 @@
-from xmlrpc.client import DateTime
-from sqlalchemy import Column, Integer, String,ForeignKey,DateTime
+from xmlrpc.client import Boolean, DateTime
+from sqlalchemy import Column, Integer, String,ForeignKey,DateTime,Boolean
 from database import engine
 from sqlalchemy.orm import declarative_base,relationship
 from datetime import datetime
@@ -25,4 +25,13 @@ class Transaction(Base):
     description = Column(String)
     type = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
+    is_recurring = Column(
+    Boolean,
+    default=False
+)
+
+recurring_type = Column(
+    String,
+    nullable=True
+)
 Base.metadata.create_all(bind=engine)    

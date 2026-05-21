@@ -14,7 +14,9 @@ export default function LoginPage() {
     console.log({ name, email, password });
   
   try {
-    await login({ email, password });
+    const result = await login({ email, password });
+    console.log("Login successful:", result);
+    localStorage.setItem("token", result.access_token);
     router.push("/dashboard");
   } catch (error) {
     alert("Invalid credentials");
