@@ -1,10 +1,13 @@
 from django import db
+from dotenv import load_dotenv
+load_dotenv()
 from fastapi import FastAPI
 from fastapi import Header
 from models import User, Transaction
 from database import SessionLocal
 from auth import hash_password, verify_password, create_token,verify_token
 from schemas import LoginRequest
+
 from fastapi import *
 from fastapi.middleware.cors import CORSMiddleware
 from schemas import RegisterRequest,TransactionRequest
