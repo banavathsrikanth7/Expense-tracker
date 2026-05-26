@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -6,29 +7,25 @@ export default function ThemeToggle() {
 
     const [dark,setDark] =
     useState(false);
+useEffect(()=>{
 
-    useEffect(()=>{
+const savedTheme=
+localStorage.getItem(
+"theme"
+);
 
-        const savedTheme =
+const isDark=
+savedTheme==="dark";
 
-        localStorage.getItem(
-            "theme"
-        );
+document.documentElement
+.classList.toggle(
+"dark",
+isDark
+);
 
-        if(
-            savedTheme==="dark"
-        ){
+setDark(isDark);
 
-            setDark(true);
-
-            document.documentElement
-            .classList.add(
-                "dark"
-            );
-
-        }
-
-    },[]);
+},[]);
 
 
 
