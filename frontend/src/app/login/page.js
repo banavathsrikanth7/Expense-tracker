@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 "use client";
 import { useState } from "react";
 import Link from "next/link";
@@ -111,7 +112,7 @@ const handleGoogleLogin = async () => {
             
 
             <p className="text-center text-sm text-black">
-              Don't have an account?<Link href="/register" className="text-blue-900 text-lg hover:underline">
+              Don&apos;t have an account?<Link href="/register" className="text-blue-900 text-lg hover:underline">
                 Register
               </Link>
             </p>
