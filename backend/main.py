@@ -1,4 +1,4 @@
-from django import db
+
 from dotenv import load_dotenv
 load_dotenv()
 from fastapi import FastAPI
