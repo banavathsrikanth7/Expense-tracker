@@ -17,7 +17,7 @@ import csv
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://expense-tracker-3w975vtdr-banavath-srikanths-projects.vercel.app"],
+    allow_origins=["http://localhost:3000", "https://expense-tracker-ykcnmpsck-banavath-srikanths-projects.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
