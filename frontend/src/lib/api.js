@@ -138,3 +138,16 @@ const a = document.createElement("a");
 a.href = url;
 a.download = "transactions.csv";
 a.click();}
+
+export async function googleLogin(data){
+    const response = await fetch(`${BASE_URL}/google-login`,
+        {
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify(data)
+        }
+    );
+    return response.json();
+}

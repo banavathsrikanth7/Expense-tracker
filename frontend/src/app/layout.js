@@ -1,11 +1,14 @@
+
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 export default function RootLayout({ children }) {
 
 return(
 <html lang="en">
 <body className="bg-gradient-to-br from-slate-100 via-blue-100 to-purple-100 min-h-screen">
+    <GoogleOAuthProvider clientId="301244006884-pko7ph36vh20hunud4nngu18rgl3i2ja.apps.googleusercontent.com">
 <Toaster position="top-right"/>
 <nav className="
 flex
@@ -107,7 +110,7 @@ Register
 {children}
 
 </div>
-
+</GoogleOAuthProvider>
 </body>
 
 </html>

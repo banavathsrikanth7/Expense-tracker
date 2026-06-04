@@ -4,9 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { login } from "@/lib/api";
+import { GoogleLogin } from "@react-oauth/google";
+import{jwtDecode} from "jwt-decode";
+import {googleLogin} from "@/lib/api";
 
 export default function LoginPage() {
-  const [name, setName] = useState("");
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
@@ -22,13 +25,13 @@ export default function LoginPage() {
   } catch (error) {
     alert("Invalid credentials");
   }
-    setName("");
+   
     setEmail("");
     setPassword("");
   };
   
 
-const handleGoogleLogin = async () => {
+/*const handleGoogleLogin = async () => {
   try {
     const provider = new GoogleAuthProvider();
     await signInWithPopup(auth, provider);
@@ -36,12 +39,12 @@ const handleGoogleLogin = async () => {
   } catch (error) {
     alert(error.message);
   }
-};
+};*/
 
 
   return (
   
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-teal-100 to-white px-4">
+    <div className=" h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-teal-100 to-white px-4 overflow-hidden">
       
       
       <div className="flex flex-col items-center w-full max-w-md">
@@ -58,18 +61,6 @@ const handleGoogleLogin = async () => {
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm m-1 font-medium">Name:</label>
-              <input
-                type="text"
-                placeholder="Enter your name"
-                className="w-full p-2 border-2 border-violet-950 rounded-xl"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </div>
-
             <div>
               <label className="block text-sm m-1 font-medium">Email:</label>
               <input
@@ -100,14 +91,7 @@ const handleGoogleLogin = async () => {
             >
               Login
             </button>
-            <button
-  type="button"
-  onClick={handleGoogleLogin}
-  className="w-full border flex items-center justify-center gap-2 p-2 rounded hover:bg-gray-100"
->
-  <span>🔵</span>
-  <span>Continue with Google</span>
-</button>
+           
 
             
 
@@ -116,7 +100,21 @@ const handleGoogleLogin = async () => {
                 Register
               </Link>
             </p>
-          </form>
+          </form> <div className="mt-4">
+          <GoogleLogin
+  onSuccess={async (credentialResponse) => {
+    const user = jwtDecode(credentialResponse.credential);
+    console.log(user);
+    const result = await googleLogin({ email: user.email, name: user.name });
+    console.log("Google Login successful:", result);
+    localStorage.setItem("token", result.access_token);
+    console.log("Token stored in localStorage:", result.access_token);
+    router.push("/dashboard");
+  }}
+  onError={() => {
+    console.log("Login Failed");
+  }}
+/> </div>
         </div>
 
       </div>

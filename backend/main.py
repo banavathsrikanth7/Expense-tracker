@@ -12,7 +12,7 @@ from fastapi import *
 from fastapi.middleware.cors import CORSMiddleware
 from schemas import RegisterRequest,TransactionRequest
 from fastapi.responses import FileResponse
-
+from pydantic import BaseModel
 import csv
 app = FastAPI()
 app.add_middleware(
@@ -22,6 +22,38 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+class GoogleUser(BaseModel):
+    email: str
+    name: str
+
+def get_current_user(token: str):
+
+    payload = verify_token(token)
+
+    if not payload:
+        return None
+
+    db = SessionLocal()
+
+    user = db.query(User).filter(
+        User.email == payload["sub"]
+    ).first()
+
+    return user
+
+@app.post("/google-login")
+def google_login(data: GoogleUser):
+    db = SessionLocal()
+    user = db.query(User).filter(User.email == data.email).first()
+    if not user:
+        # Create new user
+        hashed = hash_password("google_user")  # Use a default password or generate one
+        user = User(name=data.name, email=data.email, password=hashed)
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    token = create_token({"sub": user.email})
+    return {"access_token": token}
 
 @app.post("/register")
 def register (data: RegisterRequest):
@@ -33,8 +65,9 @@ def register (data: RegisterRequest):
     user = User(name=data.name, email=data.email, password=hashed)
     db.add(user)
     db.commit()
-
-    return {"message": "User created"}
+    db.refresh(user)
+    token = create_token({"sub": user.email})
+    return {"access_token": token}
 
 
 @app.post("/login")
@@ -68,26 +101,14 @@ def profile(Authorization: str = Header(None)):
     return {
         "message": "Welcome to your profile",
         "user": payload}
-def get_current_user(token: str):
 
-    payload = verify_token(token)
 
-    if not payload:
-        return None
-
-    db = SessionLocal()
-
-    user = db.query(User).filter(
-        User.email == payload["sub"]
-    ).first()
-
-    return user
 
 
 @app.post("/transactions")
 def create_transaction(data: TransactionRequest, Authorization: str = Header(None)):
     print("AUTH:", Authorization)
-    current_user = get_current_user(Authorization)
+   
     if not Authorization:
         return {"error": "Unauthorized"}
     token = Authorization.replace("Bearer ", "")

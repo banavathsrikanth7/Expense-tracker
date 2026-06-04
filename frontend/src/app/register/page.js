@@ -3,6 +3,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
 import { register } from "@/lib/api";
+import { GoogleLogin } from "@react-oauth/google";
+import{jwtDecode} from "jwt-decode";
+import {googleLogin} from "@/lib/api";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -27,7 +30,7 @@ export default function RegisterPage() {
 
   return (
     
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-teal-100 to-white px-4">
+    <div className="  h-screen  flex items-center justify-center bg-gradient-to-br from-emerald-50 via-teal-100 to-white px-4 overflow-hidden">
       
       
       <div className="flex flex-col items-center w-full max-w-md">
@@ -93,6 +96,19 @@ export default function RegisterPage() {
               </Link>
             </p>
           </form>
+          <div className="mt-4">
+          <GoogleLogin
+  onSuccess={async (credentialResponse) => {
+    const user = jwtDecode(credentialResponse.credential);
+    console.log(user);
+    const result = await googleLogin({ email: user.email, name: user.name });
+    localStorage.setItem("token", result.access_token);
+    router.push("/dashboard");
+  }}
+  onError={() => {
+    console.log("Login Failed");
+  }}
+/> </div>
         </div>
 
       </div>

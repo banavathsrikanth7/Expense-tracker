@@ -338,6 +338,7 @@ transactions.length>0 && (
 <div className="
 grid
 md:grid-cols-3
+lg:flex-row
 items-center
 bg-gradient-to-r
 from-slate-300
