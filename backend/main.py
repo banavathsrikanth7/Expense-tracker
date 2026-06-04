@@ -20,7 +20,7 @@ app.add_middleware(
     allow_origins=["http://localhost:3000", "https://expense-tracker-5qtqliqb7-banavath-srikanths-projects.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
 )
 
 @app.post("/register")
